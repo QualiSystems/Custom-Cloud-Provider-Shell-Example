@@ -1,0 +1,72 @@
+tosca_definitions_version: tosca_simple_yaml_1_0
+
+metadata:
+  template_name: HeavenlyCloudShell
+  template_author: Anonymous
+  template_version: 0.1.0
+  template_icon: heavenly-clouds-icon.png
+
+description: >
+ Sample TOSCA based shell
+
+imports:
+  - cloudshell_standard: cloudshell_cloud_provider_standard_1_0_0.yaml
+
+node_types:
+ vendor.resource.HeavenlyCloudShell:
+    derived_from: cloudshell.nodes.CustomCloudProvider
+    properties:
+      User:
+        type: string        
+        description: user name
+      Password:
+        type: string        
+        description: password
+      Heaven cloud color:
+        type: string
+        description: color of a cloud
+      Default storage:
+        type: string
+        description: default storage
+
+    capabilities:
+      auto_discovery_capability:
+        type: cloudshell.capabilities.AutoDiscovery
+        properties:        
+          enable_auto_discovery:
+            type: boolean
+            default: true
+          auto_discovery_description:
+            type: string
+            default: Describe the auto discovery
+          inventory_description:
+            type: string
+            default: Describe the resource shell template          
+          hide_address:
+            type: string
+            default: false
+          Heaven cloud color:
+            type: string
+            default: white          
+          User:
+            type: string
+            default: no one
+          Password:
+            type: string
+            default: 123456           
+          Region:
+            type: string
+            default: narnia
+    artifacts:
+      icon:
+        file: heavenly-clouds-icon.png
+        type: tosca.artifacts.File
+      driver:
+        file: HeavenlyCloudShellDriver.zip
+        type: tosca.artifacts.File
+      deployment:
+        file: Deployments.zip
+        type: tosca.artifacts.File
+
+
+     

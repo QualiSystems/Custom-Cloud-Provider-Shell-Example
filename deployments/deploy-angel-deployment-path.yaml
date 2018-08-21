@@ -1,0 +1,34 @@
+tosca_definitions_version: tosca_simple_yaml_1_0
+
+metadata:
+  template_name: HeavenlyCloudShell
+  template_author: Anonymous
+  template_version: 0.1.0
+  template_icon: deploy-angel.png
+
+description: >
+  deploy-angel deployment path file
+
+imports:
+  - cloudshell_standard: cloudshell_cloud_provider_standard_1_0_0.yaml
+
+node_types:
+  vendor.resource.HeavenlyCloudAngelDeployment:
+    derived_from: cloudshell.nodes.CustomDeploymentOption
+    properties:        
+      wing_count:        
+        type: integer
+        tags: [user_input]
+      flight_speed:  
+        type: float
+        tags: [user_input]    
+      cloud_size:
+        type: string
+        tags: [user_input] 
+      cloud_image_id:
+        type: string
+        tags: [user_input, editable_only_in_app_template]
+    artifacts:
+      icon:
+        file: deploy-angel.png
+        type: tosca.artifacts.File
