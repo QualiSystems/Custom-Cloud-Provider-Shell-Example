@@ -56,7 +56,7 @@ class HeavenlyCloudShellDriver(ResourceDriverInterface):
         resource = HeavenlyCloudShell.create_from_context(context)
 
         with LoggingSessionContext(context) as logger, ErrorHandlingContext(logger):
-                self._log_value(logger, 'get_inventory_context_json', context)
+                self._log(logger, 'get_inventory_context_json', context)
 
                 # validating
                 if resource.name == 'evil':
@@ -90,8 +90,8 @@ class HeavenlyCloudShellDriver(ResourceDriverInterface):
        :rtype: str
        """
         with LoggingSessionContext(context) as logger, ErrorHandlingContext(logger):
-            self._log_value(logger, 'deploy_request', request)
-            self._log_value(logger, 'deploy_context', context)
+            self._log(logger, 'deploy_request', request)
+            self._log(logger, 'deploy_context', context)
 
             # parse the json strings into action objects
             cloud_provider_resource = HeavenlyCloudShell.create_from_context(context)
@@ -112,8 +112,8 @@ class HeavenlyCloudShellDriver(ResourceDriverInterface):
             else:
                 raise ValueError(deployment_name + ' deployment option is not supported.')
 
-            self._log_value(logger, 'deployment_name', deployment_name)
-            self._log_value(logger, 'deploy_result', deploy_result)
+            self._log(logger, 'deployment_name', deployment_name)
+            self._log(logger, 'deploy_result', deploy_result)
 
 
             return DriverResponse([deploy_result]).to_driver_response_json()
@@ -125,10 +125,12 @@ class HeavenlyCloudShellDriver(ResourceDriverInterface):
         :param ports:
         """
         with LoggingSessionContext(context) as logger, ErrorHandlingContext(logger):
-                self._log_value(logger, 'power_on_context', context)
-                self._log_value(logger, 'power_on_ports', ports)
-                deployed_app_dict = json.loads(context.remote_endpoints[0].app_context.deployed_app_json)
+                self._log(logger, 'power_on_context', context)
+                self._log(logger, 'power_on_ports', ports)
+
                 cloud_provider_resource = HeavenlyCloudShell.create_from_context(context)
+                resource_ep =  context.remote_endpoints[0]
+                deployed_app_dict = json.loads(resource_ep.app_context.deployed_app_json)
 
                 HeavenlyCloudServiceWrapper.power_on(cloud_provider_resource, deployed_app_dict['vmdetails']['uid'])
     def PowerOff(self, context, ports):
@@ -159,14 +161,14 @@ class HeavenlyCloudShellDriver(ResourceDriverInterface):
         :return:
         """
         with LoggingSessionContext(context) as logger, ErrorHandlingContext(logger):
-                self._log_value(logger, 'GetVmDetails_context', context)
-                self._log_value(logger, 'GetVmDetails_requests', requests)
+                self._log(logger, 'GetVmDetails_context', context)
+                self._log(logger, 'GetVmDetails_requests', requests)
                 cloud_provider_resource = HeavenlyCloudShell.create_from_context(context)
                 result = HeavenlyCloudServiceWrapper.get_vm_details(cloud_provider_resource, cancellation_context,
                                                                      requests)
                 result_json = json.dumps(result, default=lambda o: o.__dict__, sort_keys=True, separators=(',', ':'))
 
-                self._log_value(logger, 'GetVmDetails_result', result_json)
+                self._log(logger, 'GetVmDetails_result', result_json)
 
                 return result_json
 
@@ -181,14 +183,15 @@ class HeavenlyCloudShellDriver(ResourceDriverInterface):
         """
         with LoggingSessionContext(context) as logger, ErrorHandlingContext(logger):
                 with CloudShellSessionContext(context) as cs_session:
-                    self._log_value(logger, 'remote_refresh_ip_context', context)
-                    self._log_value(logger, 'remote_refresh_ip_ports', ports)
-                    self._log_value(logger, 'remote_refresh_ip_cancellation_context', cancellation_context)
+                    self._log(logger, 'remote_refresh_ip_context', context)
+                    self._log(logger, 'remote_refresh_ip_ports', ports)
+                    self._log(logger, 'remote_refresh_ip_cancellation_context', cancellation_context)
                     cloud_provider_resource = HeavenlyCloudShell.create_from_context(context)
                     deployed_app_dict = json.loads(context.remote_endpoints[0].app_context.deployed_app_json)
                     remote_ep =  context.remote_endpoints[0]
                     deployed_app_private_ip = remote_ep.address
                     deployed_app_public_ip = None
+
                     public_ip_att = first_or_default(deployed_app_dict['attributes'],lambda x:x['name'] == 'Public IP')
 
                     if public_ip_att:
@@ -280,7 +283,7 @@ class HeavenlyCloudShellDriver(ResourceDriverInterface):
         """
         pass
 
-    def _log_value(self, logger, name, obj):
+    def _log(self, logger, name, obj):
 
         if not obj:
             logger.info(name + 'Value  is None')

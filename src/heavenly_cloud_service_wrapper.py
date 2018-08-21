@@ -189,10 +189,9 @@ class HeavenlyCloudServiceWrapper(object):
     def remote_refresh_ip(cloud_provider_resource, cancellation_context,cs_session, resource_full_name,vm_id, deployed_app_private_ip,deployed_app_public_ip):
 
         curr_ip = HeavenlyCloudService.remote_refresh_ip(cloud_provider_resource, cancellation_context, resource_full_name,vm_id)
-        cs_session.UpdateResourceAddress(resource_full_name, curr_ip)
 
-        #
-        # if private_ip_on_aws != private_ip_on_resource:
-        #
+        if deployed_app_private_ip != curr_ip:
+            cs_session.UpdateResourceAddress(resource_full_name, curr_ip)
 
-
+        if not deployed_app_public_ip:
+            cs_session.SetAttributeValue(resource_full_name, "Public IP",'1.1.1.1')
