@@ -32,17 +32,9 @@ class HeavenlyCloudShellDriver(ResourceDriverInterface):
         This is a good place to load and cache the driver configuration, initiate sessions etc.
         :param InitCommandContext context: the context the command runs on
         """
-
         self.request_parser = DriverRequestParser()
-        self.deployments = dict()
         self.request_parser.add_deployment_model(HeavenlyCloudAngelDeploymentModel)
         self.request_parser.add_deployment_model(HeavenlyCloudManDeploymentModel)
-
-        # TODO
-        # add custom deployment models to shellfoundry generate
-        # fix or discuss on the fact that deployapp deployment path format is HeavenlyCloudShell.HeavenlyCloudAngelDeployment (why namespace?)
-        self.deployments[HeavenlyCloudAngelDeploymentModel.__deploymentModel__] = HeavenlyCloudServiceWrapper.deploy_angel
-        self.deployments[HeavenlyCloudManDeploymentModel.__deploymentModel__] = HeavenlyCloudServiceWrapper.deploy_man
 
 
     # <editor-fold desc="Discovery">
@@ -56,25 +48,25 @@ class HeavenlyCloudShellDriver(ResourceDriverInterface):
         resource = HeavenlyCloudShell.create_from_context(context)
 
         with LoggingSessionContext(context) as logger, ErrorHandlingContext(logger):
-                self._log(logger, 'get_inventory_context_json', context)
+            self._log(logger, 'get_inventory_context_json', context)
 
-                # validating
-                if resource.name == 'evil':
-                    raise ValueError('evil cannot use heaven ')
+            # validating
+            if resource.name == 'evil':
+                raise ValueError('evil cannot use heaven ')
 
-                if resource.region == 'sun':
-                    raise ValueError('invalid region, sorry ca\'nt deploy instances on the sun')
+            if resource.region == 'sun':
+                raise ValueError('invalid region, sorry ca\'nt deploy instances on the sun')
 
-                # using your cloud provider sdk
-                if not HeavenlyCloudService.can_connect(resource.user, resource.password,
-                                                         context.resource.address):  # TODO add address to resource (gal shellfoundry team)
-                    raise ValueError('could not connect using given credentials')
+            # using your cloud provider sdk
+            if not HeavenlyCloudService.can_connect(resource.user, resource.password,
+                                                     context.resource.address):  # TODO add address to resource (gal shellfoundry team)
+                raise ValueError('could not connect using given credentials')
 
-                # discovering - using your prefered custom cloud service you can discover and then update values
-                if not resource.heaven_cloud_color:
-                    resource.heaven_cloud_color = HeavenlyCloudService.get_prefered_cloud_color()
+            # discovering - using your prefered custom cloud service you can discover and then update values
+            if not resource.heaven_cloud_color:
+                resource.heaven_cloud_color = HeavenlyCloudService.get_prefered_cloud_color()
 
-                return resource.create_autoload_details()
+            return resource.create_autoload_details()
 
     # </editor-fold>
 
@@ -90,33 +82,33 @@ class HeavenlyCloudShellDriver(ResourceDriverInterface):
        :rtype: str
        """
         with LoggingSessionContext(context) as logger, ErrorHandlingContext(logger):
-            self._log(logger, 'deploy_request', request)
-            self._log(logger, 'deploy_context', context)
+            with CloudShellSessionContext(context) as cloudshell_session:
+                self._log(logger, 'deploy_request', request)
+                self._log(logger, 'deploy_context', context)
 
-            # parse the json strings into action objects
-            cloud_provider_resource = HeavenlyCloudShell.create_from_context(context)
-            actions = self.request_parser.convert_driver_request_to_actions(request)
+                # parse the json strings into action objects
+                cloud_provider_resource = HeavenlyCloudShell.create_from_context(context)
+                actions = self.request_parser.convert_driver_request_to_actions(request)
 
-            # extract DeployApp action
-            deploy_action = single(actions, lambda x: isinstance(x, DeployApp))
+                # extract DeployApp action
+                deploy_action = single(actions, lambda x: isinstance(x, DeployApp))
 
-            # if we have multiple supported deployment options use the 'deploymentPath' property
-            # to decide which deployment option to use.
-            deployment_name = deploy_action.actionParams.deployment.deploymentPath
+                # if we have multiple supported deployment options use the 'deploymentPath' property
+                # to decide which deployment option to use.
+                deployment_name = deploy_action.actionParams.deployment.deploymentPath
 
-            if deployment_name == 'HeavenlyCloudShell.HeavenlyCloudAngelDeployment':
-                deploy_result = HeavenlyCloudServiceWrapper.deploy_angel(context.reservation.reservation_id, cloud_provider_resource, deploy_action, cancellation_context)
-            elif deployment_name == 'HeavenlyCloudShell.HeavenlyCloudManDeployment':
-                deploy_result = HeavenlyCloudServiceWrapper.deploy_man(context.reservation.reservation_id, cloud_provider_resource,
-                                                         deploy_action, cancellation_context)
-            else:
-                raise ValueError(deployment_name + ' deployment option is not supported.')
+                if deployment_name == 'HeavenlyCloudShell.HeavenlyCloudAngelDeployment':
+                    deploy_result = HeavenlyCloudServiceWrapper.deploy_angel(context, cloudshell_session, cloud_provider_resource, deploy_action, cancellation_context)
+                elif deployment_name == 'HeavenlyCloudShell.HeavenlyCloudManDeployment':
+                    deploy_result = HeavenlyCloudServiceWrapper.deploy_man(context, cloudshell_session,cloud_provider_resource,deploy_action, cancellation_context)
+                else:
+                    raise ValueError(deployment_name + ' deployment option is not supported.')
 
-            self._log(logger, 'deployment_name', deployment_name)
-            self._log(logger, 'deploy_result', deploy_result)
+                self._log(logger, 'deployment_name', deployment_name)
+                self._log(logger, 'deploy_result', deploy_result)
 
 
-            return DriverResponse([deploy_result]).to_driver_response_json()
+                return DriverResponse([deploy_result]).to_driver_response_json()
 
     def PowerOn(self, context, ports):
         """
@@ -125,21 +117,30 @@ class HeavenlyCloudShellDriver(ResourceDriverInterface):
         :param ports:
         """
         with LoggingSessionContext(context) as logger, ErrorHandlingContext(logger):
-                self._log(logger, 'power_on_context', context)
-                self._log(logger, 'power_on_ports', ports)
+            self._log(logger, 'power_on_context', context)
+            self._log(logger, 'power_on_ports', ports)
 
-                cloud_provider_resource = HeavenlyCloudShell.create_from_context(context)
-                resource_ep =  context.remote_endpoints[0]
-                deployed_app_dict = json.loads(resource_ep.app_context.deployed_app_json)
+            cloud_provider_resource = HeavenlyCloudShell.create_from_context(context)
+            resource_ep =  context.remote_endpoints[0]
+            deployed_app_dict = json.loads(resource_ep.app_context.deployed_app_json)
 
-                HeavenlyCloudServiceWrapper.power_on(cloud_provider_resource, deployed_app_dict['vmdetails']['uid'])
+            HeavenlyCloudServiceWrapper.power_on(cloud_provider_resource, deployed_app_dict['vmdetails']['uid'])
+
     def PowerOff(self, context, ports):
         """
         Will power off the compute resource
         :param ResourceRemoteCommandContext context:
         :param ports:
         """
-        pass
+        with LoggingSessionContext(context) as logger, ErrorHandlingContext(logger):
+            self._log(logger, 'power_off_context', context)
+            self._log(logger, 'power_off_ports', ports)
+
+            cloud_provider_resource = HeavenlyCloudShell.create_from_context(context)
+            resource_ep =  context.remote_endpoints[0]
+            deployed_app_dict = json.loads(resource_ep.app_context.deployed_app_json)
+
+            HeavenlyCloudServiceWrapper.power_off(cloud_provider_resource, deployed_app_dict['vmdetails']['uid'])
 
     def PowerCycle(self, context, ports, delay):
         pass
@@ -150,7 +151,16 @@ class HeavenlyCloudShellDriver(ResourceDriverInterface):
         :param ResourceRemoteCommandContext context:
         :param ports:
         """
-        pass
+        with LoggingSessionContext(context) as logger, ErrorHandlingContext(logger):
+            self._log(logger, 'DeleteInstance_context', context)
+            self._log(logger, 'DeleteInstance_ports', ports)
+
+            cloud_provider_resource = HeavenlyCloudShell.create_from_context(context)
+            resource_ep =  context.remote_endpoints[0]
+            deployed_app_dict = json.loads(resource_ep.app_context.deployed_app_json)
+
+            HeavenlyCloudServiceWrapper.delete_instance(cloud_provider_resource, deployed_app_dict['vmdetails']['uid'])
+
 
     def GetVmDetails(self, context, requests, cancellation_context):
         """
@@ -182,25 +192,25 @@ class HeavenlyCloudShellDriver(ResourceDriverInterface):
         :return:
         """
         with LoggingSessionContext(context) as logger, ErrorHandlingContext(logger):
-                with CloudShellSessionContext(context) as cs_session:
-                    self._log(logger, 'remote_refresh_ip_context', context)
-                    self._log(logger, 'remote_refresh_ip_ports', ports)
-                    self._log(logger, 'remote_refresh_ip_cancellation_context', cancellation_context)
-                    cloud_provider_resource = HeavenlyCloudShell.create_from_context(context)
-                    deployed_app_dict = json.loads(context.remote_endpoints[0].app_context.deployed_app_json)
-                    remote_ep =  context.remote_endpoints[0]
-                    deployed_app_private_ip = remote_ep.address
-                    deployed_app_public_ip = None
+            with CloudShellSessionContext(context) as cloudshell_session:
+                self._log(logger, 'remote_refresh_ip_context', context)
+                self._log(logger, 'remote_refresh_ip_ports', ports)
+                self._log(logger, 'remote_refresh_ip_cancellation_context', cancellation_context)
+                cloud_provider_resource = HeavenlyCloudShell.create_from_context(context)
+                deployed_app_dict = json.loads(context.remote_endpoints[0].app_context.deployed_app_json)
+                remote_ep =  context.remote_endpoints[0]
+                deployed_app_private_ip = remote_ep.address
+                deployed_app_public_ip = None
 
-                    public_ip_att = first_or_default(deployed_app_dict['attributes'],lambda x:x['name'] == 'Public IP')
+                public_ip_att = first_or_default(deployed_app_dict['attributes'],lambda x:x['name'] == 'Public IP')
 
-                    if public_ip_att:
-                        deployed_app_public_ip = public_ip_att['value']
+                if public_ip_att:
+                    deployed_app_public_ip = public_ip_att['value']
 
-                    deployed_app_fullname = remote_ep.fullname
-                    vm_instance_id = deployed_app_dict['vmdetails']['uid']
+                deployed_app_fullname = remote_ep.fullname
+                vm_instance_id = deployed_app_dict['vmdetails']['uid']
 
-                    HeavenlyCloudServiceWrapper.remote_refresh_ip(cloud_provider_resource,cancellation_context,cs_session,deployed_app_fullname,vm_instance_id,deployed_app_private_ip,deployed_app_public_ip)
+                HeavenlyCloudServiceWrapper.remote_refresh_ip(cloud_provider_resource, cancellation_context, cloudshell_session, deployed_app_fullname, vm_instance_id, deployed_app_private_ip, deployed_app_public_ip)
 
     # </editor-fold>
 

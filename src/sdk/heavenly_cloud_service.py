@@ -27,6 +27,14 @@ class HeavenlyCloudService(object):
         pass
 
     @staticmethod
+    def power_off(cloud_provider_resource, vm_id):
+        pass
+
+    @staticmethod
+    def delete_instance(cloud_provider_resource, vm_id):
+        pass
+
+    @staticmethod
     def create_new_password(cloud_provider_resource,user,password):
         return str(uuid.uuid4())
 
@@ -66,4 +74,4 @@ class HeavenlyCloudService(object):
         HeavenlyCloudService.connect(cloud_provider_resource.user, cloud_provider_resource.password,
                                       cloud_provider_resource.address)
 
-        return '5.5.5.5'
+        return '5.5.5.1'
