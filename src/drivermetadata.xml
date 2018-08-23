@@ -2,7 +2,6 @@
     <Layout>
         <Category Name="Connectivity">
             <Command Description="" DisplayName="Refresh IP" EnableCancellation="true" Name="remote_refresh_ip" Tags="remote_connectivity,allow_shared" />
-            <Command Description="" DisplayName="Apply Connectivity Changes" Name="ApplyConnectivityChanges" Tags="allow_unreserved" />
             <Command Description="" DisplayName="Prepare Connectivity" EnableCancellation="true" Name="PrepareSandboxInfra" Tags="allow_unreserved" />
             <Command Description="" DisplayName="Cleanup Connectivity" EnableCancellation="true" Name="CleanupSandboxInfra" Tags="allow_unreserved" />
         </Category>

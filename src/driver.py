@@ -1,5 +1,6 @@
 from cloudshell.cp.core import DriverRequestParser
-from cloudshell.cp.core.models import DriverResponse, DeployApp, DeployAppResult
+from cloudshell.cp.core.models import DriverResponse, DeployApp, DeployAppResult, PrepareCloudInfra, CreateKeys, \
+    PrepareSubnet
 from cloudshell.shell.core.resource_driver_interface import ResourceDriverInterface
 from cloudshell.cp.core.models import DriverResponse
 from cloudshell.shell.core.driver_context import InitCommandContext, AutoLoadCommandContext, ResourceCommandContext, \
@@ -217,19 +218,6 @@ class HeavenlyCloudShellDriver(ResourceDriverInterface):
     ### NOTE: According to the Connectivity Type of your shell, remove the commands that are not
     ###       relevant from this file and from drivermetadata.xml.
 
-    # <editor-fold desc="Mandatory Commands For L2 Connectivity Type">
-
-    def ApplyConnectivityChanges(self, context, request):
-        """
-        Configures VLANs on multiple ports or port-channels
-        :param ResourceCommandContext context: The context object for the command with resource and reservation info
-        :param str request: A JSON string with the list of requested connectivity changes
-        :return: a json object with the list of connectivity changes which were carried out by the driver
-        :rtype: str
-        """
-        pass
-
-    # </editor-fold>
 
     # <editor-fold desc="Mandatory Commands For L3 Connectivity Type">
 
@@ -250,7 +238,25 @@ class HeavenlyCloudShellDriver(ResourceDriverInterface):
 
         return DriverResponse(action_results).to_driver_response_json()    
         '''
-        pass
+        with LoggingSessionContext(context) as logger, ErrorHandlingContext(logger):
+            with CloudShellSessionContext(context) as cloudshell_session:
+                self._log(logger, 'deploy_request', request)
+                self._log(logger, 'deploy_context', context)
+
+                # parse the json strings into action objects
+                cloud_provider_resource = HeavenlyCloudShell.create_from_context(context)
+                actions = self.request_parser.convert_driver_request_to_actions(request)
+
+                # extract PrepareCloudInfra action
+                prepare_infa_action = single(actions, lambda x: isinstance(x, PrepareCloudInfra))
+
+                # extract CreateKeys action
+                create_keys_action = single(actions, lambda x: isinstance(x, CreateKeys))
+
+                # extract PrepareSubnet action
+                prepare_subnet_actions = list(filter(lambda x: isinstance(x, PrepareSubnet), actions))
+
+
 
     def CleanupSandboxInfra(self, context, request):
         """

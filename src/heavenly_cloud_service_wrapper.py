@@ -4,6 +4,7 @@ from cloudshell.cp.core.models import *
 from data_model import *
 from sdk.heavenly_cloud_service import HeavenlyCloudService
 import json
+from typing import List
 
 class HeavenlyCloudServiceWrapper(object):
 
@@ -203,8 +204,36 @@ class HeavenlyCloudServiceWrapper(object):
             cloudshell_session.UpdateResourceAddress(resource_full_name, curr_ip)
 
         if not deployed_app_public_ip:
-            cloudshell_session.SetAttributeValue(resource_full_name, "Public IP",'1.1.1.1')
+            cloudshell_session.SetAttributeValue(resource_full_name, "Public IP", '1.1.1.1')
 
     @staticmethod
     def delete_instance(cloud_provider_resource, vm_id):
         HeavenlyCloudService.delete_instance(cloud_provider_resource, vm_id)
+
+    @staticmethod
+    def prepare_sandbox_infra(logger, cloud_provider_resource, prepare_infa_action, create_keys_action,
+                              prepare_subnet_actions):
+        """
+        :param logging.Logger logger:
+        :param HeavenlyCloudShell cloud_provider_resource:
+        :param PrepareCloudInfra prepare_infa_action:
+        :param CreateKeys create_keys_action:
+        :param List[PrepareSubnet] prepare_subnet_actions:
+        :return:
+        :rtype:
+        """
+
+        results = []
+
+        # handle PrepareInfraAction - extract sandbox CIDR and create/allocate a network in the cloud provider with
+        # an address range of the provided CIDR
+        cidr = prepare_infa_action.actionParams.cidr
+        logger.info("Received CIDR {0} from server".format(cidr))
+        results.append(PrepareCloudInfraResult(prepare_infa_action.actionId))
+
+        # handle CreateKeys - generate key pair or get it from the cloud provider and save it in a secure location
+        # that will be accessible from the Deploy method
+        results.append(CreateKeysActionResult(create_keys_action.actionId, accessKey='my_ssh_key'))
+
+        # handle prepareSubnets
+
