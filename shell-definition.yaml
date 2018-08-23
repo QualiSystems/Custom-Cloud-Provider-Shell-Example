@@ -44,7 +44,7 @@ node_types:
             default: Describe the resource shell template          
           hide_address:
             type: string
-            default: false
+            default: true
           Heaven cloud color:
             type: string
             default: white          

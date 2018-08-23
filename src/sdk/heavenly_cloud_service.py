@@ -75,3 +75,19 @@ class HeavenlyCloudService(object):
                                       cloud_provider_resource.address)
 
         return '5.5.5.1'
+
+    @staticmethod
+    def prepare_infra(cloud_provider_resource, cidr):
+        pass
+
+    @staticmethod
+    def get_or_create_ssh_key():
+        return 'sandbox_ssh_key'
+
+    @staticmethod
+    def prepare_single_mode_subnet(sandbox_cidr):
+        pass
+
+    @staticmethod
+    def prepare_subnet(subnet_cidr, is_public, attributes):
+        return 'subnet_id_{}'.format(str(uuid.uuid4())[:8])
