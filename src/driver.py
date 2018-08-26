@@ -1,6 +1,6 @@
 from cloudshell.cp.core import DriverRequestParser
 from cloudshell.cp.core.models import DriverResponse, DeployApp, DeployAppResult, PrepareCloudInfra, CreateKeys, \
-    PrepareSubnet
+    PrepareSubnet, ConnectSubnet, CleanupNetwork
 from cloudshell.shell.core.resource_driver_interface import ResourceDriverInterface
 from cloudshell.cp.core.models import DriverResponse
 from cloudshell.shell.core.driver_context import InitCommandContext, AutoLoadCommandContext, ResourceCommandContext, \
@@ -78,7 +78,7 @@ class HeavenlyCloudShellDriver(ResourceDriverInterface):
        Deploy
        :param ResourceCommandContext context:
        :param str request: A JSON string with the list of requested deployment actions
-    :param CancellationContext cancellation_context:
+       :param CancellationContext cancellation_context:
        :return:
        :rtype: str
        """
@@ -94,17 +94,24 @@ class HeavenlyCloudShellDriver(ResourceDriverInterface):
                 # extract DeployApp action
                 deploy_action = single(actions, lambda x: isinstance(x, DeployApp))
 
+                # extract ConnectToSubnetActions
+                connect_subnet_actions = list(filter(lambda x: isinstance(x, ConnectSubnet), actions))
+
                 # if we have multiple supported deployment options use the 'deploymentPath' property
                 # to decide which deployment option to use.
                 deployment_name = deploy_action.actionParams.deployment.deploymentPath
 
                 if deployment_name == 'HeavenlyCloudShell.HeavenlyCloudAngelDeployment':
                     deploy_result = HeavenlyCloudServiceWrapper.deploy_angel(context, cloudshell_session,
-                                                                             cloud_provider_resource, deploy_action,
+                                                                             cloud_provider_resource,
+                                                                             deploy_action,
+                                                                             connect_subnet_actions,
                                                                              cancellation_context)
                 elif deployment_name == 'HeavenlyCloudShell.HeavenlyCloudManDeployment':
                     deploy_result = HeavenlyCloudServiceWrapper.deploy_man(context, cloudshell_session,
-                                                                           cloud_provider_resource, deploy_action,
+                                                                           cloud_provider_resource,
+                                                                           deploy_action,
+                                                                           connect_subnet_actions,
                                                                            cancellation_context)
                 else:
                     raise ValueError(deployment_name + ' deployment option is not supported.')
@@ -112,7 +119,7 @@ class HeavenlyCloudShellDriver(ResourceDriverInterface):
                 self._log(logger, 'deployment_name', deployment_name)
                 self._log(logger, 'deploy_result', deploy_result)
 
-                return DriverResponse([deploy_result]).to_driver_response_json()
+                return DriverResponse(deploy_result).to_driver_response_json()
 
     def PowerOn(self, context, ports):
         """
@@ -236,8 +243,9 @@ class HeavenlyCloudShellDriver(ResourceDriverInterface):
                 self._log(logger, 'request', request)
                 self._log(logger, 'context', context)
 
-                # parse the json strings into action objects
                 cloud_provider_resource = HeavenlyCloudShell.create_from_context(context)
+
+                # parse the json strings into action objects
                 actions = self.request_parser.convert_driver_request_to_actions(request)
 
                 # extract PrepareCloudInfra action
@@ -268,15 +276,25 @@ class HeavenlyCloudShellDriver(ResourceDriverInterface):
         :return:
         :rtype: str
         """
-        '''
-        # parse the json strings into action objects
-        actions = self.request_parser.convert_driver_request_to_actions(request)
+        with LoggingSessionContext(context) as logger, ErrorHandlingContext(logger):
+            with CloudShellSessionContext(context) as cloudshell_session:
+                self._log(logger, 'request', request)
+                self._log(logger, 'context', context)
 
-        action_results = _my_cleanup_connectivity(context, actions)
+                cloud_provider_resource = HeavenlyCloudShell.create_from_context(context)
 
-        return DriverResponse(action_results).to_driver_response_json()    
-        '''
-        pass
+                # parse the json strings into action objects
+                actions = self.request_parser.convert_driver_request_to_actions(request)
+
+                # extract CleanupNetwork action
+                cleanup_action = single(actions, lambda x: isinstance(x, CleanupNetwork))
+
+                action_result = HeavenlyCloudServiceWrapper.cleanup_sandbox_infra(cloud_provider_resource, cleanup_action)
+
+                self._log(logger, 'action_result', action_result)
+
+                return DriverResponse([action_result]).to_driver_response_json()
+
 
     # </editor-fold>
 
