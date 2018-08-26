@@ -44,7 +44,7 @@ node_types:
             default: Describe the resource shell template          
           hide_address:
             type: string
-            default: false
+            default: true
           Heaven cloud color:
             type: string
             default: white          
@@ -57,6 +57,10 @@ node_types:
           Region:
             type: string
             default: narnia
+
+      concurrent_command_capability:
+        type: cloudshell.capabilities.SupportConcurrentCommands
+
     artifacts:
       icon:
         file: heavenly-clouds-icon.png
