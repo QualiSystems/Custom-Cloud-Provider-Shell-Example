@@ -20,7 +20,7 @@ import json
 # from data_model import *  # run 'shellfoundry generate' to generate data model classes
 
 
-class HeavenlyCloudShellDriver(ResourceDriverInterface):
+class L3HeavenlyCloudShellDriver(ResourceDriverInterface):
 
     def __init__(self):
         """
@@ -46,7 +46,7 @@ class HeavenlyCloudShellDriver(ResourceDriverInterface):
         # return AutoLoadDetails([], [])
 
         # read from context
-        resource = HeavenlyCloudShell.create_from_context(context)
+        resource = L3HeavenlyCloudShell.create_from_context(context)
 
         with LoggingSessionContext(context) as logger, ErrorHandlingContext(logger):
             self._log(logger, 'get_inventory_context_json', context)
@@ -88,7 +88,7 @@ class HeavenlyCloudShellDriver(ResourceDriverInterface):
                 self._log(logger, 'deploy_context', context)
 
                 # parse the json strings into action objects
-                cloud_provider_resource = HeavenlyCloudShell.create_from_context(context)
+                cloud_provider_resource = L3HeavenlyCloudShell.create_from_context(context)
                 actions = self.request_parser.convert_driver_request_to_actions(request)
 
                 # extract DeployApp action
@@ -101,14 +101,14 @@ class HeavenlyCloudShellDriver(ResourceDriverInterface):
                 # to decide which deployment option to use.
                 deployment_name = deploy_action.actionParams.deployment.deploymentPath
 
-                if deployment_name == 'HeavenlyCloudShell.HeavenlyCloudAngelDeployment':
-                    deploy_result = HeavenlyCloudServiceWrapper.deploy_angel(context, cloudshell_session,
+                if deployment_name == 'L3HeavenlyCloudShell.HeavenlyCloudAngelDeployment':
+                    deploy_results = HeavenlyCloudServiceWrapper.deploy_angel(context, cloudshell_session,
                                                                              cloud_provider_resource,
                                                                              deploy_action,
                                                                              connect_subnet_actions,
                                                                              cancellation_context)
-                elif deployment_name == 'HeavenlyCloudShell.HeavenlyCloudManDeployment':
-                    deploy_result = HeavenlyCloudServiceWrapper.deploy_man(context, cloudshell_session,
+                elif deployment_name == 'L3HeavenlyCloudShell.HeavenlyCloudManDeployment':
+                    deploy_results = HeavenlyCloudServiceWrapper.deploy_man(context, cloudshell_session,
                                                                            cloud_provider_resource,
                                                                            deploy_action,
                                                                            connect_subnet_actions,
@@ -117,9 +117,9 @@ class HeavenlyCloudShellDriver(ResourceDriverInterface):
                     raise ValueError(deployment_name + ' deployment option is not supported.')
 
                 self._log(logger, 'deployment_name', deployment_name)
-                self._log(logger, 'deploy_result', deploy_result)
+                self._log(logger, 'deploy_results', deploy_results)
 
-                return DriverResponse(deploy_result).to_driver_response_json()
+                return DriverResponse(deploy_results).to_driver_response_json()
 
     def PowerOn(self, context, ports):
         """
@@ -131,7 +131,7 @@ class HeavenlyCloudShellDriver(ResourceDriverInterface):
             self._log(logger, 'power_on_context', context)
             self._log(logger, 'power_on_ports', ports)
 
-            cloud_provider_resource = HeavenlyCloudShell.create_from_context(context)
+            cloud_provider_resource = L3HeavenlyCloudShell.create_from_context(context)
             resource_ep = context.remote_endpoints[0]
             deployed_app_dict = json.loads(resource_ep.app_context.deployed_app_json)
 
@@ -147,7 +147,7 @@ class HeavenlyCloudShellDriver(ResourceDriverInterface):
             self._log(logger, 'power_off_context', context)
             self._log(logger, 'power_off_ports', ports)
 
-            cloud_provider_resource = HeavenlyCloudShell.create_from_context(context)
+            cloud_provider_resource = L3HeavenlyCloudShell.create_from_context(context)
             resource_ep = context.remote_endpoints[0]
             deployed_app_dict = json.loads(resource_ep.app_context.deployed_app_json)
 
@@ -166,7 +166,7 @@ class HeavenlyCloudShellDriver(ResourceDriverInterface):
             self._log(logger, 'DeleteInstance_context', context)
             self._log(logger, 'DeleteInstance_ports', ports)
 
-            cloud_provider_resource = HeavenlyCloudShell.create_from_context(context)
+            cloud_provider_resource = L3HeavenlyCloudShell.create_from_context(context)
             resource_ep = context.remote_endpoints[0]
             deployed_app_dict = json.loads(resource_ep.app_context.deployed_app_json)
 
@@ -183,7 +183,7 @@ class HeavenlyCloudShellDriver(ResourceDriverInterface):
         with LoggingSessionContext(context) as logger, ErrorHandlingContext(logger):
             self._log(logger, 'GetVmDetails_context', context)
             self._log(logger, 'GetVmDetails_requests', requests)
-            cloud_provider_resource = HeavenlyCloudShell.create_from_context(context)
+            cloud_provider_resource = L3HeavenlyCloudShell.create_from_context(context)
             result = HeavenlyCloudServiceWrapper.get_vm_details(cloud_provider_resource, cancellation_context,
                                                                 requests)
             result_json = json.dumps(result, default=lambda o: o.__dict__, sort_keys=True, separators=(',', ':'))
@@ -205,7 +205,7 @@ class HeavenlyCloudShellDriver(ResourceDriverInterface):
                 self._log(logger, 'remote_refresh_ip_context', context)
                 self._log(logger, 'remote_refresh_ip_ports', ports)
                 self._log(logger, 'remote_refresh_ip_cancellation_context', cancellation_context)
-                cloud_provider_resource = HeavenlyCloudShell.create_from_context(context)
+                cloud_provider_resource = L3HeavenlyCloudShell.create_from_context(context)
                 deployed_app_dict = json.loads(context.remote_endpoints[0].app_context.deployed_app_json)
                 remote_ep = context.remote_endpoints[0]
                 deployed_app_private_ip = remote_ep.address
@@ -240,10 +240,10 @@ class HeavenlyCloudShellDriver(ResourceDriverInterface):
         """
         with LoggingSessionContext(context) as logger, ErrorHandlingContext(logger):
             with CloudShellSessionContext(context) as cloudshell_session:
-                self._log(logger, 'request', request)
-                self._log(logger, 'context', context)
+                self._log(logger, 'PrepareSandboxInfra_request', request)
+                self._log(logger, 'PrepareSandboxInfra_context', context)
 
-                cloud_provider_resource = HeavenlyCloudShell.create_from_context(context)
+                cloud_provider_resource = L3HeavenlyCloudShell.create_from_context(context)
 
                 # parse the json strings into action objects
                 actions = self.request_parser.convert_driver_request_to_actions(request)
@@ -254,7 +254,7 @@ class HeavenlyCloudShellDriver(ResourceDriverInterface):
                 # extract CreateKeys action
                 create_keys_action = single(actions, lambda x: isinstance(x, CreateKeys))
 
-                # extract PrepareSubnet action
+                # extract PrepareSubnet actions
                 prepare_subnet_actions = list(filter(lambda x: isinstance(x, PrepareSubnet), actions))
 
                 action_results = HeavenlyCloudServiceWrapper.prepare_sandbox_infra(logger,
@@ -264,7 +264,7 @@ class HeavenlyCloudShellDriver(ResourceDriverInterface):
                                                                                    prepare_subnet_actions,
                                                                                    cancellation_context)
 
-                self._log(logger, 'action_results', action_results)
+                self._log(logger, 'PrepareSandboxInfra_action_results', action_results)
 
                 return DriverResponse(action_results).to_driver_response_json()
 
@@ -278,10 +278,10 @@ class HeavenlyCloudShellDriver(ResourceDriverInterface):
         """
         with LoggingSessionContext(context) as logger, ErrorHandlingContext(logger):
             with CloudShellSessionContext(context) as cloudshell_session:
-                self._log(logger, 'request', request)
-                self._log(logger, 'context', context)
+                self._log(logger, 'CleanupSandboxInfra_request', request)
+                self._log(logger, 'CleanupSandboxInfra_context', context)
 
-                cloud_provider_resource = HeavenlyCloudShell.create_from_context(context)
+                cloud_provider_resource = L3HeavenlyCloudShell.create_from_context(context)
 
                 # parse the json strings into action objects
                 actions = self.request_parser.convert_driver_request_to_actions(request)
@@ -291,7 +291,7 @@ class HeavenlyCloudShellDriver(ResourceDriverInterface):
 
                 action_result = HeavenlyCloudServiceWrapper.cleanup_sandbox_infra(cloud_provider_resource, cleanup_action)
 
-                self._log(logger, 'action_result', action_result)
+                self._log(logger, 'CleanupSandboxInfra_action_result', action_result)
 
                 return DriverResponse([action_result]).to_driver_response_json()
 

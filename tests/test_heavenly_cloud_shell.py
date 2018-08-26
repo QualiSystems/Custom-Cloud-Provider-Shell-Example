@@ -2,15 +2,15 @@
 # -*- coding: utf-8 -*-
 
 """
-Tests for `HeavenlyCloudShellDriver`
+Tests for `L3HeavenlyCloudShellDriver`
 """
 
 import unittest
 
-from driver import HeavenlyCloudShellDriver
+from driver import L3HeavenlyCloudShellDriver
 
 
-class TestHeavenlyCloudShellDriver(unittest.TestCase):
+class TestL3HeavenlyCloudShellDriver(unittest.TestCase):
 
     def setUp(self):
         pass

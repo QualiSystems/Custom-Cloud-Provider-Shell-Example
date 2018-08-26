@@ -72,14 +72,14 @@ class LegacyUtils(object):
         return inspect.getmembers(sys.modules[__name__], inspect.isclass)
 
 
-class HeavenlyCloudShell(object):
+class L3HeavenlyCloudShell(object):
     def __init__(self, name):
         """
         
         """
         self.attributes = {}
         self.resources = {}
-        self._cloudshell_model_name = 'HeavenlyCloudShell'
+        self._cloudshell_model_name = 'L3HeavenlyCloudShell'
         self._name = name
 
     def add_sub_resource(self, relative_path, sub_resource):
@@ -92,9 +92,9 @@ class HeavenlyCloudShell(object):
         :param context: cloudshell.shell.core.driver_context.ResourceCommandContext
         :type context: cloudshell.shell.core.driver_context.ResourceCommandContext
         :return:
-        :rtype HeavenlyCloudShell
+        :rtype L3HeavenlyCloudShell
         """
-        result = HeavenlyCloudShell(name=context.resource.name)
+        result = L3HeavenlyCloudShell(name=context.resource.name)
         for attr in context.resource.attributes:
             result.attributes[attr] = context.resource.attributes[attr]
         return result
@@ -152,14 +152,14 @@ class HeavenlyCloudShell(object):
         Returns the name of the Cloudshell model
         :return:
         """
-        return 'HeavenlyCloudShell'
+        return 'L3HeavenlyCloudShell'
 
     @property
     def user(self):
         """
         :rtype: str
         """
-        return self.attributes['HeavenlyCloudShell.User'] if 'HeavenlyCloudShell.User' in self.attributes else None
+        return self.attributes['L3HeavenlyCloudShell.User'] if 'L3HeavenlyCloudShell.User' in self.attributes else None
 
     @user.setter
     def user(self, value):
@@ -167,14 +167,14 @@ class HeavenlyCloudShell(object):
         user name
         :type value: str
         """
-        self.attributes['HeavenlyCloudShell.User'] = value
+        self.attributes['L3HeavenlyCloudShell.User'] = value
 
     @property
     def password(self):
         """
         :rtype: str
         """
-        return self.attributes['HeavenlyCloudShell.Password'] if 'HeavenlyCloudShell.Password' in self.attributes else None
+        return self.attributes['L3HeavenlyCloudShell.Password'] if 'L3HeavenlyCloudShell.Password' in self.attributes else None
 
     @password.setter
     def password(self, value):
@@ -182,14 +182,14 @@ class HeavenlyCloudShell(object):
         password
         :type value: str
         """
-        self.attributes['HeavenlyCloudShell.Password'] = value
+        self.attributes['L3HeavenlyCloudShell.Password'] = value
 
     @property
     def heaven_cloud_color(self):
         """
         :rtype: str
         """
-        return self.attributes['HeavenlyCloudShell.Heaven cloud color'] if 'HeavenlyCloudShell.Heaven cloud color' in self.attributes else None
+        return self.attributes['L3HeavenlyCloudShell.Heaven cloud color'] if 'L3HeavenlyCloudShell.Heaven cloud color' in self.attributes else None
 
     @heaven_cloud_color.setter
     def heaven_cloud_color(self, value):
@@ -197,14 +197,14 @@ class HeavenlyCloudShell(object):
         color of a cloud
         :type value: str
         """
-        self.attributes['HeavenlyCloudShell.Heaven cloud color'] = value
+        self.attributes['L3HeavenlyCloudShell.Heaven cloud color'] = value
     @property
     def address(self):
         """
         :rtype: str
         """
         return self.attributes[
-            'HeavenlyCloudShell.address'] if 'HeavenlyCloudShell.address' in self.attributes else None
+            'L3HeavenlyCloudShell.address'] if 'L3HeavenlyCloudShell.address' in self.attributes else None
 
     @address.setter
     def address(self, value):
@@ -212,13 +212,13 @@ class HeavenlyCloudShell(object):
         address
         :type value: str
         """
-        self.attributes['HeavenlyCloudShell.address'] = value
+        self.attributes['L3HeavenlyCloudShell.address'] = value
     @property
     def default_storage(self):
         """
         :rtype: str
         """
-        return self.attributes['HeavenlyCloudShell.Default storage'] if 'HeavenlyCloudShell.Default storage' in self.attributes else None
+        return self.attributes['L3HeavenlyCloudShell.Default storage'] if 'L3HeavenlyCloudShell.Default storage' in self.attributes else None
 
     @default_storage.setter
     def default_storage(self, value):
@@ -226,14 +226,14 @@ class HeavenlyCloudShell(object):
         default storage
         :type value: str
         """
-        self.attributes['HeavenlyCloudShell.Default storage'] = value
+        self.attributes['L3HeavenlyCloudShell.Default storage'] = value
 
     @property
     def networking_type(self):
         """
         :rtype: str
         """
-        return self.attributes['HeavenlyCloudShell.Networking type'] if 'HeavenlyCloudShell.Networking type' in self.attributes else None
+        return self.attributes['L3HeavenlyCloudShell.Networking type'] if 'L3HeavenlyCloudShell.Networking type' in self.attributes else None
 
     @networking_type.setter
     def networking_type(self, value):
@@ -241,14 +241,14 @@ class HeavenlyCloudShell(object):
         networking type that the cloud provider implements- L2 networking (VLANs) or L3 (Subnets)
         :type value: str
         """
-        self.attributes['HeavenlyCloudShell.Networking type'] = value
+        self.attributes['L3HeavenlyCloudShell.Networking type'] = value
 
     @property
     def region(self):
         """
         :rtype: str
         """
-        return self.attributes['HeavenlyCloudShell.Region'] if 'HeavenlyCloudShell.Region' in self.attributes else None
+        return self.attributes['L3HeavenlyCloudShell.Region'] if 'L3HeavenlyCloudShell.Region' in self.attributes else None
 
     @region.setter
     def region(self, value=''):
@@ -256,14 +256,14 @@ class HeavenlyCloudShell(object):
         The public cloud region to be used by this cloud provider.
         :type value: str
         """
-        self.attributes['HeavenlyCloudShell.Region'] = value
+        self.attributes['L3HeavenlyCloudShell.Region'] = value
 
     @property
     def networks_in_use(self):
         """
         :rtype: str
         """
-        return self.attributes['HeavenlyCloudShell.Networks in use'] if 'HeavenlyCloudShell.Networks in use' in self.attributes else None
+        return self.attributes['L3HeavenlyCloudShell.Networks in use'] if 'L3HeavenlyCloudShell.Networks in use' in self.attributes else None
 
     @networks_in_use.setter
     def networks_in_use(self, value=''):
@@ -271,14 +271,14 @@ class HeavenlyCloudShell(object):
         Reserved network ranges to be excluded when allocated sandbox networks (for cloud providers with L3 networking). The syntax is a comma separated CIDR list. For example "10.0.0.0/24, 10.1.0.0/26"
         :type value: str
         """
-        self.attributes['HeavenlyCloudShell.Networks in use'] = value
+        self.attributes['L3HeavenlyCloudShell.Networks in use'] = value
 
     @property
     def vlan_type(self):
         """
         :rtype: str
         """
-        return self.attributes['HeavenlyCloudShell.VLAN Type'] if 'HeavenlyCloudShell.VLAN Type' in self.attributes else None
+        return self.attributes['L3HeavenlyCloudShell.VLAN Type'] if 'L3HeavenlyCloudShell.VLAN Type' in self.attributes else None
 
     @vlan_type.setter
     def vlan_type(self, value='VLAN'):
@@ -286,7 +286,7 @@ class HeavenlyCloudShell(object):
         whether to use VLAN or VXLAN (for cloud providers with L2 networking)
         :type value: str
         """
-        self.attributes['HeavenlyCloudShell.VLAN Type'] = value
+        self.attributes['L3HeavenlyCloudShell.VLAN Type'] = value
 
     @property
     def name(self):
@@ -326,7 +326,7 @@ class HeavenlyCloudAngelDeployment(object):
         """
         self.attributes = {}
         self.resources = {}
-        self._cloudshell_model_name = 'HeavenlyCloudShell.HeavenlyCloudAngelDeployment'
+        self._cloudshell_model_name = 'L3HeavenlyCloudShell.HeavenlyCloudAngelDeployment'
         self._name = name
 
     def add_sub_resource(self, relative_path, sub_resource):
@@ -406,7 +406,7 @@ class HeavenlyCloudAngelDeployment(object):
         """
         :rtype: float
         """
-        return self.attributes['HeavenlyCloudShell.HeavenlyCloudAngelDeployment.wing_count'] if 'HeavenlyCloudShell.HeavenlyCloudAngelDeployment.wing_count' in self.attributes else None
+        return self.attributes['L3HeavenlyCloudShell.HeavenlyCloudAngelDeployment.wing_count'] if 'L3HeavenlyCloudShell.HeavenlyCloudAngelDeployment.wing_count' in self.attributes else None
 
     @wing_count.setter
     def wing_count(self, value):
@@ -414,14 +414,14 @@ class HeavenlyCloudAngelDeployment(object):
         
         :type value: float
         """
-        self.attributes['HeavenlyCloudShell.HeavenlyCloudAngelDeployment.wing_count'] = value
+        self.attributes['L3HeavenlyCloudShell.HeavenlyCloudAngelDeployment.wing_count'] = value
 
     @property
     def flight_speed(self):
         """
         :rtype: float
         """
-        return self.attributes['HeavenlyCloudShell.HeavenlyCloudAngelDeployment.flight_speed'] if 'HeavenlyCloudShell.HeavenlyCloudAngelDeployment.flight_speed' in self.attributes else None
+        return self.attributes['L3HeavenlyCloudShell.HeavenlyCloudAngelDeployment.flight_speed'] if 'L3HeavenlyCloudShell.HeavenlyCloudAngelDeployment.flight_speed' in self.attributes else None
 
     @flight_speed.setter
     def flight_speed(self, value):
@@ -429,14 +429,14 @@ class HeavenlyCloudAngelDeployment(object):
         
         :type value: float
         """
-        self.attributes['HeavenlyCloudShell.HeavenlyCloudAngelDeployment.flight_speed'] = value
+        self.attributes['L3HeavenlyCloudShell.HeavenlyCloudAngelDeployment.flight_speed'] = value
 
     @property
     def cloud_size(self):
         """
         :rtype: str
         """
-        return self.attributes['HeavenlyCloudShell.HeavenlyCloudAngelDeployment.cloud_size'] if 'HeavenlyCloudShell.HeavenlyCloudAngelDeployment.cloud_size' in self.attributes else None
+        return self.attributes['L3HeavenlyCloudShell.HeavenlyCloudAngelDeployment.cloud_size'] if 'L3HeavenlyCloudShell.HeavenlyCloudAngelDeployment.cloud_size' in self.attributes else None
 
     @cloud_size.setter
     def cloud_size(self, value):
@@ -444,14 +444,14 @@ class HeavenlyCloudAngelDeployment(object):
         
         :type value: str
         """
-        self.attributes['HeavenlyCloudShell.HeavenlyCloudAngelDeployment.cloud_size'] = value
+        self.attributes['L3HeavenlyCloudShell.HeavenlyCloudAngelDeployment.cloud_size'] = value
 
     @property
     def cloud_image_id(self):
         """
         :rtype: str
         """
-        return self.attributes['HeavenlyCloudShell.HeavenlyCloudAngelDeployment.cloud_image_id'] if 'HeavenlyCloudShell.HeavenlyCloudAngelDeployment.cloud_image_id' in self.attributes else None
+        return self.attributes['L3HeavenlyCloudShell.HeavenlyCloudAngelDeployment.cloud_image_id'] if 'L3HeavenlyCloudShell.HeavenlyCloudAngelDeployment.cloud_image_id' in self.attributes else None
 
     @cloud_image_id.setter
     def cloud_image_id(self, value):
@@ -459,14 +459,14 @@ class HeavenlyCloudAngelDeployment(object):
         
         :type value: str
         """
-        self.attributes['HeavenlyCloudShell.HeavenlyCloudAngelDeployment.cloud_image_id'] = value
+        self.attributes['L3HeavenlyCloudShell.HeavenlyCloudAngelDeployment.cloud_image_id'] = value
 
     @property
     def autoload(self):
         """
         :rtype: bool
         """
-        return self.attributes['HeavenlyCloudShell.HeavenlyCloudAngelDeployment.Autoload'] if 'HeavenlyCloudShell.HeavenlyCloudAngelDeployment.Autoload' in self.attributes else None
+        return self.attributes['L3HeavenlyCloudShell.HeavenlyCloudAngelDeployment.Autoload'] if 'L3HeavenlyCloudShell.HeavenlyCloudAngelDeployment.Autoload' in self.attributes else None
 
     @autoload.setter
     def autoload(self, value=True):
@@ -474,14 +474,14 @@ class HeavenlyCloudAngelDeployment(object):
         Whether to call the autoload command during Sandbox setup
         :type value: bool
         """
-        self.attributes['HeavenlyCloudShell.HeavenlyCloudAngelDeployment.Autoload'] = value
+        self.attributes['L3HeavenlyCloudShell.HeavenlyCloudAngelDeployment.Autoload'] = value
 
     @property
     def wait_for_ip(self):
         """
         :rtype: bool
         """
-        return self.attributes['HeavenlyCloudShell.HeavenlyCloudAngelDeployment.Wait for IP'] if 'HeavenlyCloudShell.HeavenlyCloudAngelDeployment.Wait for IP' in self.attributes else None
+        return self.attributes['L3HeavenlyCloudShell.HeavenlyCloudAngelDeployment.Wait for IP'] if 'L3HeavenlyCloudShell.HeavenlyCloudAngelDeployment.Wait for IP' in self.attributes else None
 
     @wait_for_ip.setter
     def wait_for_ip(self, value=True):
@@ -489,7 +489,7 @@ class HeavenlyCloudAngelDeployment(object):
         if set to false the deployment will not wait for the VM to get an IP address
         :type value: bool
         """
-        self.attributes['HeavenlyCloudShell.HeavenlyCloudAngelDeployment.Wait for IP'] = value
+        self.attributes['L3HeavenlyCloudShell.HeavenlyCloudAngelDeployment.Wait for IP'] = value
 
     @property
     def name(self):
@@ -529,7 +529,7 @@ class HeavenlyCloudManDeployment(object):
         """
         self.attributes = {}
         self.resources = {}
-        self._cloudshell_model_name = 'HeavenlyCloudShell.HeavenlyCloudManDeployment'
+        self._cloudshell_model_name = 'L3HeavenlyCloudShell.HeavenlyCloudManDeployment'
         self._name = name
 
     def add_sub_resource(self, relative_path, sub_resource):
@@ -609,7 +609,7 @@ class HeavenlyCloudManDeployment(object):
         """
         :rtype: float
         """
-        return self.attributes['HeavenlyCloudShell.HeavenlyCloudManDeployment.weight'] if 'HeavenlyCloudShell.HeavenlyCloudManDeployment.weight' in self.attributes else None
+        return self.attributes['L3HeavenlyCloudShell.HeavenlyCloudManDeployment.weight'] if 'L3HeavenlyCloudShell.HeavenlyCloudManDeployment.weight' in self.attributes else None
 
     @weight.setter
     def weight(self, value):
@@ -617,14 +617,14 @@ class HeavenlyCloudManDeployment(object):
         
         :type value: float
         """
-        self.attributes['HeavenlyCloudShell.HeavenlyCloudManDeployment.weight'] = value
+        self.attributes['L3HeavenlyCloudShell.HeavenlyCloudManDeployment.weight'] = value
 
     @property
     def height(self):
         """
         :rtype: float
         """
-        return self.attributes['HeavenlyCloudShell.HeavenlyCloudManDeployment.height'] if 'HeavenlyCloudShell.HeavenlyCloudManDeployment.height' in self.attributes else None
+        return self.attributes['L3HeavenlyCloudShell.HeavenlyCloudManDeployment.height'] if 'L3HeavenlyCloudShell.HeavenlyCloudManDeployment.height' in self.attributes else None
 
     @height.setter
     def height(self, value):
@@ -632,14 +632,14 @@ class HeavenlyCloudManDeployment(object):
         
         :type value: float
         """
-        self.attributes['HeavenlyCloudShell.HeavenlyCloudManDeployment.height'] = value
+        self.attributes['L3HeavenlyCloudShell.HeavenlyCloudManDeployment.height'] = value
 
     @property
     def cloud_size(self):
         """
         :rtype: str
         """
-        return self.attributes['HeavenlyCloudShell.HeavenlyCloudManDeployment.cloud_size'] if 'HeavenlyCloudShell.HeavenlyCloudManDeployment.cloud_size' in self.attributes else None
+        return self.attributes['L3HeavenlyCloudShell.HeavenlyCloudManDeployment.cloud_size'] if 'L3HeavenlyCloudShell.HeavenlyCloudManDeployment.cloud_size' in self.attributes else None
 
     @cloud_size.setter
     def cloud_size(self, value):
@@ -647,14 +647,14 @@ class HeavenlyCloudManDeployment(object):
         
         :type value: str
         """
-        self.attributes['HeavenlyCloudShell.HeavenlyCloudManDeployment.cloud_size'] = value
+        self.attributes['L3HeavenlyCloudShell.HeavenlyCloudManDeployment.cloud_size'] = value
 
     @property
     def cloud_image_id(self):
         """
         :rtype: str
         """
-        return self.attributes['HeavenlyCloudShell.HeavenlyCloudManDeployment.cloud_image_id'] if 'HeavenlyCloudShell.HeavenlyCloudManDeployment.cloud_image_id' in self.attributes else None
+        return self.attributes['L3HeavenlyCloudShell.HeavenlyCloudManDeployment.cloud_image_id'] if 'L3HeavenlyCloudShell.HeavenlyCloudManDeployment.cloud_image_id' in self.attributes else None
 
     @cloud_image_id.setter
     def cloud_image_id(self, value):
@@ -662,14 +662,14 @@ class HeavenlyCloudManDeployment(object):
         
         :type value: str
         """
-        self.attributes['HeavenlyCloudShell.HeavenlyCloudManDeployment.cloud_image_id'] = value
+        self.attributes['L3HeavenlyCloudShell.HeavenlyCloudManDeployment.cloud_image_id'] = value
 
     @property
     def autoload(self):
         """
         :rtype: bool
         """
-        return self.attributes['HeavenlyCloudShell.HeavenlyCloudManDeployment.Autoload'] if 'HeavenlyCloudShell.HeavenlyCloudManDeployment.Autoload' in self.attributes else None
+        return self.attributes['L3HeavenlyCloudShell.HeavenlyCloudManDeployment.Autoload'] if 'L3HeavenlyCloudShell.HeavenlyCloudManDeployment.Autoload' in self.attributes else None
 
     @autoload.setter
     def autoload(self, value=True):
@@ -677,14 +677,14 @@ class HeavenlyCloudManDeployment(object):
         Whether to call the autoload command during Sandbox setup
         :type value: bool
         """
-        self.attributes['HeavenlyCloudShell.HeavenlyCloudManDeployment.Autoload'] = value
+        self.attributes['L3HeavenlyCloudShell.HeavenlyCloudManDeployment.Autoload'] = value
 
     @property
     def wait_for_ip(self):
         """
         :rtype: bool
         """
-        return self.attributes['HeavenlyCloudShell.HeavenlyCloudManDeployment.Wait for IP'] if 'HeavenlyCloudShell.HeavenlyCloudManDeployment.Wait for IP' in self.attributes else None
+        return self.attributes['L3HeavenlyCloudShell.HeavenlyCloudManDeployment.Wait for IP'] if 'L3HeavenlyCloudShell.HeavenlyCloudManDeployment.Wait for IP' in self.attributes else None
 
     @wait_for_ip.setter
     def wait_for_ip(self, value=True):
@@ -692,7 +692,7 @@ class HeavenlyCloudManDeployment(object):
         if set to false the deployment will not wait for the VM to get an IP address
         :type value: bool
         """
-        self.attributes['HeavenlyCloudShell.HeavenlyCloudManDeployment.Wait for IP'] = value
+        self.attributes['L3HeavenlyCloudShell.HeavenlyCloudManDeployment.Wait for IP'] = value
 
     @property
     def name(self):
@@ -735,7 +735,7 @@ class HeavenlyCloudManDeployment(object):
 # to see how injecting, parsing works, look at driver.py __init__ method for example
 
 class HeavenlyCloudAngelDeploymentModel(object):
-    __deploymentModel__ = 'HeavenlyCloudShell.HeavenlyCloudAngelDeployment'
+    __deploymentModel__ = 'L3HeavenlyCloudShell.HeavenlyCloudAngelDeployment'
 
     def __init__(self, attributes):
         self.wing_count = ''
@@ -749,12 +749,12 @@ class HeavenlyCloudAngelDeploymentModel(object):
             try_set_attr(self, to_snake_case(self.remove_deployment_prefix(k)), v)
 
     # attributes key convention is __deploymentModel__.attribute_name
-    # e.g HeavenlyCloudShell.HeavenlyCloudAngelDeployment.wing_count
+    # e.g L3HeavenlyCloudShell.HeavenlyCloudAngelDeployment.wing_count
     def remove_deployment_prefix(self, key):
         return key[len(HeavenlyCloudAngelDeploymentModel.__deploymentModel__) + 1:]
 
 class HeavenlyCloudManDeploymentModel(object):
-    __deploymentModel__ = 'HeavenlyCloudShell.HeavenlyCloudManDeployment'
+    __deploymentModel__ = 'L3HeavenlyCloudShell.HeavenlyCloudManDeployment'
 
     def __init__(self, attributes):
         self.weight = ''
@@ -768,7 +768,7 @@ class HeavenlyCloudManDeploymentModel(object):
             try_set_attr(self, to_snake_case(self.remove_deployment_prefix(k)), v)
 
     # attributes key convetion is __deploymentModel__.attribute_name
-    # e.g HeavenlyCloudShell.HeavenlyCloudManDeployment.height
+    # e.g L3HeavenlyCloudShell.HeavenlyCloudManDeployment.height
     def remove_deployment_prefix(self, key):
         return key[len(HeavenlyCloudManDeploymentModel.__deploymentModel__) + 1:]
 
