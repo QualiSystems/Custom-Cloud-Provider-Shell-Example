@@ -275,21 +275,17 @@ class HeavenlyCloudServiceWrapper(object):
         check_cancellation_context(cancellation_context)
 
         # handle PrepareSubnetsAction
-        if not prepare_subnet_actions:
-            # multi subnets mode - nothing to return
-            HeavenlyCloudService.prepare_single_mode_subnet(cidr)
-        else:
-            for action in prepare_subnet_actions:
-                try:
-                    subnet_id = HeavenlyCloudService.prepare_subnet(action.actionParams.cidr,
-                                                                    action.actionParams.isPublic,
-                                                                    action.actionParams.subnetServiceAttributes)
-                    results.append(PrepareSubnetActionResult(action.actionId, subnet_id=subnet_id))
-                except:
-                    logger.error(traceback.format_exc())
-                    results.append(PrepareSubnetActionResult(action.actionId,
-                                                             success=False,
-                                                             errorMessage=traceback.format_exc()))
+        for action in prepare_subnet_actions:
+            try:
+                subnet_id = HeavenlyCloudService.prepare_subnet(action.actionParams.cidr,
+                                                                action.actionParams.isPublic,
+                                                                action.actionParams.subnetServiceAttributes)
+                results.append(PrepareSubnetActionResult(action.actionId, subnet_id=subnet_id))
+            except:
+                logger.error(traceback.format_exc())
+                results.append(PrepareSubnetActionResult(action.actionId,
+                                                         success=False,
+                                                         errorMessage=traceback.format_exc()))
 
         check_cancellation_context(cancellation_context)
 

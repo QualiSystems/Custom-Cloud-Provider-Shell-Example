@@ -233,8 +233,8 @@ class HeavenlyCloudShellDriver(ResourceDriverInterface):
         """
         with LoggingSessionContext(context) as logger, ErrorHandlingContext(logger):
             with CloudShellSessionContext(context) as cloudshell_session:
-                self._log(logger, 'deploy_request', request)
-                self._log(logger, 'deploy_context', context)
+                self._log(logger, 'request', request)
+                self._log(logger, 'context', context)
 
                 # parse the json strings into action objects
                 cloud_provider_resource = HeavenlyCloudShell.create_from_context(context)

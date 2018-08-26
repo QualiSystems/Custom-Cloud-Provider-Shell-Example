@@ -85,9 +85,5 @@ class HeavenlyCloudService(object):
         return 'sandbox_ssh_key'
 
     @staticmethod
-    def prepare_single_mode_subnet(sandbox_cidr):
-        pass
-
-    @staticmethod
     def prepare_subnet(subnet_cidr, is_public, attributes):
         return 'subnet_id_{}'.format(str(uuid.uuid4())[:8])
