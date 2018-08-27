@@ -100,6 +100,7 @@ class HeavenlyCloudService(object):
     def prepare_subnet(subnet_cidr, is_public, attributes):
         return 'subnet_id_{}'.format(str(uuid.uuid4())[:8])
 
+
     @staticmethod
     def prepare_network_for_instance(connect_subnet_actions):
         """
@@ -113,6 +114,11 @@ class HeavenlyCloudService(object):
         else:
             result = {}
             for index, action in enumerate(connect_subnet_actions):
+                # Note:
+                # The 'vnicName' prop is the requested vnic to be associated with the given subnet.
+                # Here we might want to inspect the vnicName prop to decide how to map subnet ids to instance interfaces.
+                # vnic_name = action.actionParams.vnicName
                 result[action.actionParams.subnetId] = index
+
             return result
 
