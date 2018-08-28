@@ -104,12 +104,9 @@ class HeavenlyCloudServiceWrapper(object):
 
     @staticmethod
     def deploy_man(context, cloudshell_session, cloud_provider_resource, deploy_app_action, connect_subnet_actions,
-                   cancellation_context):
+                     cancellation_context):
 
-        if cancellation_context.is_cancelled:
-            HeavenlyCloudService.rollback()
-            return DeployAppResult(actionId=deploy_app_action.actionId, success=False,
-                                   errorMessage='Operation canceled')
+        check_cancellation_context(cancellation_context)
 
         # deployment_model type : HeavenlyCloudAngelDeploymentModel
         deployment_model = deploy_app_action.actionParams.deployment.customModel
@@ -141,7 +138,8 @@ class HeavenlyCloudServiceWrapper(object):
                                                                    deployment_model.weight,
                                                                    deployment_model.height,
                                                                    deployment_model.cloud_size,
-                                                                   deployment_model.cloud_image_id)
+                                                                   deployment_model.cloud_image_id,
+                                                                   network_data)
         except Exception as e:
             return DeployAppResult(actionId=deploy_app_action.actionId, success=False, errorMessage=e.message)
 

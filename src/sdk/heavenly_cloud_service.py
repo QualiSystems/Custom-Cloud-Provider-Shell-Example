@@ -49,7 +49,7 @@ class HeavenlyCloudService(object):
         pass
 
     @staticmethod
-    def create_man_instance(login_user, login_pass, cloud_provider_resource, name, height, weight, cloud_size, image):
+    def create_man_instance(login_user, login_pass, cloud_provider_resource, name, height, weight, cloud_size, image, network_data):
         # connect to cloudprovider
         HeavenlyCloudService.connect(cloud_provider_resource.user, cloud_provider_resource.password,
                                      cloud_provider_resource.address)
