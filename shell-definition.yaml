@@ -1,7 +1,7 @@
 tosca_definitions_version: tosca_simple_yaml_1_0
 
 metadata:
-  template_name: HeavenlyCloudShell
+  template_name: L3HeavenlyCloudShell
   template_author: Anonymous
   template_version: 0.1.0
   template_icon: heavenly-clouds-icon.png
@@ -13,7 +13,7 @@ imports:
   - cloudshell_standard: cloudshell_cloud_provider_standard_1_0_0.yaml
 
 node_types:
- vendor.resource.HeavenlyCloudShell:
+ vendor.resource.L3HeavenlyCloudShell:
     derived_from: cloudshell.nodes.CustomCloudProvider
     properties:
       User:
@@ -66,7 +66,7 @@ node_types:
         file: heavenly-clouds-icon.png
         type: tosca.artifacts.File
       driver:
-        file: HeavenlyCloudShellDriver.zip
+        file: L3HeavenlyCloudShellDriver.zip
         type: tosca.artifacts.File
       deployment:
         file: Deployments.zip

@@ -15,6 +15,16 @@ def check_cancellation_context_and_do_rollback(cancellation_context):
     :param CancellationContext cancellation_context:
     """
     if cancellation_context.is_cancelled:
+        # rollback what we created for current executing command then raise exception
+        # HeavenlyCloudService.rollback()
+        raise Exception('Operation cancelled')
+
+
+def check_cancellation_context(cancellation_context):
+    """
+    :param CancellationContext cancellation_context:
+    """
+    if cancellation_context.is_cancelled:
         raise Exception('Operation cancelled')
 
 
@@ -24,10 +34,7 @@ class HeavenlyCloudServiceWrapper(object):
     def deploy_angel(context, cloudshell_session, cloud_provider_resource, deploy_app_action, connect_subnet_actions,
                      cancellation_context):
 
-        if cancellation_context.is_cancelled:
-            HeavenlyCloudService.rollback()
-            return DeployAppResult(actionId=deploy_app_action.actionId, success=False,
-                                   errorMessage='Operation canceled')
+        check_cancellation_context(cancellation_context)
 
         # deployment_model type : HeavenlyCloudAngelDeploymentModel
         deployment_model = deploy_app_action.actionParams.deployment.customModel
@@ -36,10 +43,18 @@ class HeavenlyCloudServiceWrapper(object):
         vm_unique_name = deploy_app_action.actionParams.appName + '__' + str(uuid.uuid4())[:6]
 
         input_user = deploy_app_action.actionParams.appResource.attributes['User']
-        input_password = cloudshell_session.DecryptPassword(
-            deploy_app_action.actionParams.appResource.attributes['Password']).Value
+        encrypted_pass = deploy_app_action.actionParams.appResource.attributes['Password']
+        decrypted_input_password = cloudshell_session.DecryptPassword(encrypted_pass).Value
 
-        new_pass = HeavenlyCloudService.create_new_password(cloud_provider_resource, input_user, input_password)
+        deployed_app_attributes = []
+
+        if not decrypted_input_password:
+            decrypted_input_password = HeavenlyCloudService.create_new_password(cloud_provider_resource, input_user,
+                                                                                decrypted_input_password)
+            # optional
+            # deployedAppAttributes contains the attributes on the deployed app
+            # use to override attributes default values
+            deployed_app_attributes.append(Attribute('Password', decrypted_input_password))
 
         # convert the ConnectSubnet actions to networking metadata for cloud provider SDK
         network_data = HeavenlyCloudService.prepare_network_for_instance(connect_subnet_actions)
@@ -47,7 +62,7 @@ class HeavenlyCloudServiceWrapper(object):
         try:
             # using cloud provider SDK, creating the instance
             vm_instance = HeavenlyCloudService.create_angel_instance(input_user,
-                                                                     new_pass,
+                                                                     decrypted_input_password,
                                                                      cloud_provider_resource,
                                                                      vm_unique_name,
                                                                      deployment_model.wing_count,
@@ -65,32 +80,31 @@ class HeavenlyCloudServiceWrapper(object):
         action_id = deploy_app_action.actionId
 
         # optional
-        # deployedAppAttributes contains the attributes on the deployed app
-        # use to override attributes default values
-        deployed_app_attributes = [Attribute('Password', input_password + '_decrypted')]
-
-        # optional
         # deployedAppAdditionalData can contain dynamic data on the deployed app
         # similar to AWS tags
         deployed_app_additional_data_dict = {'Reservation Id': context.reservation.reservation_id,
                                              'CreatedBy': str(os.path.abspath(__file__))}
 
-        result = [DeployAppResult(actionId=action_id, success=True, vmUuid=vm_instance.id,
-                                  vmName=vm_unique_name,
-                                  deployedAppAddress=vm_instance.private_ip,
-                                  deployedAppAttributes=deployed_app_attributes,
-                                  deployedAppAdditionalData=deployed_app_additional_data_dict,
-                                  vmDetailsData=vm_details_data)]
+        deploy_result = DeployAppResult(actionId=action_id, success=True, vmUuid=vm_instance.id,
+                                        vmName=vm_unique_name,
+                                        deployedAppAddress=vm_instance.private_ip,
+                                        deployedAppAttributes=deployed_app_attributes,
+                                        deployedAppAdditionalData=deployed_app_additional_data_dict,
+                                        vmDetailsData=vm_details_data)
 
+        connect_subnet_results = []
         for connect_subnet_action in connect_subnet_actions:
-            result.append(ConnectToSubnetActionResult(connect_subnet_action.actionId,
-                                                      interface=network_data[
-                                                          connect_subnet_action.actionParams.subnetId]))
+            connect_subnet_results.append(
+                ConnectToSubnetActionResult(connect_subnet_action.actionId,
+                                            interface=network_data[connect_subnet_action.actionParams.subnetId]))
 
-        return result
+        check_cancellation_context_and_do_rollback(cancellation_context)
+
+        return [deploy_result].extend(connect_subnet_results)
 
     @staticmethod
-    def deploy_man(context, cloudshell_session, cloud_provider_resource, deploy_app_action, cancellation_context):
+    def deploy_man(context, cloudshell_session, cloud_provider_resource, deploy_app_action, connect_subnet_actions,
+                   cancellation_context):
 
         if cancellation_context.is_cancelled:
             HeavenlyCloudService.rollback()
@@ -105,14 +119,24 @@ class HeavenlyCloudServiceWrapper(object):
 
         input_user = deploy_app_action.actionParams.appResource.attributes['User']
         encrypted_pass = deploy_app_action.actionParams.appResource.attributes['Password']
+        decrypted_input_password = cloudshell_session.DecryptPassword(encrypted_pass).Value
 
-        # decrypt password using cloudshell session
-        input_password = cloudshell_session.DecryptPassword(encrypted_pass).Value
-        new_pass = HeavenlyCloudService.create_new_password(cloud_provider_resource, input_user, input_password)
+        deployed_app_attributes = []
+
+        if not decrypted_input_password:
+            decrypted_input_password = HeavenlyCloudService.create_new_password(cloud_provider_resource, input_user,
+                                                                                decrypted_input_password)
+            # optional
+            # deployedAppAttributes contains the attributes on the deployed app
+            # use to override attributes default values
+            deployed_app_attributes.append(Attribute('Password', decrypted_input_password))
+
+        # convert the ConnectSubnet actions to networking metadata for cloud provider SDK
+        network_data = HeavenlyCloudService.prepare_network_for_instance(connect_subnet_actions)
 
         try:
             # using cloud provider SDK, creating the instance
-            vm_instance = HeavenlyCloudService.create_man_instance(input_user, new_pass, cloud_provider_resource,
+            vm_instance = HeavenlyCloudService.create_man_instance(input_user, decrypted_input_password, cloud_provider_resource,
                                                                    vm_unique_name,
                                                                    deployment_model.weight,
                                                                    deployment_model.height,
@@ -130,8 +154,7 @@ class HeavenlyCloudServiceWrapper(object):
         # optional
         # deployedAppAttributes contains the attributes on the deployed app
         # use to override attributes default values
-        deployed_app_attributes = []
-        deployed_app_attributes.append(Attribute('Password', input_password + '_decrypted'))
+        deployed_app_attributes = [Attribute('Password', new_pass)]
 
         # optional
         # deployedAppAdditionalData can contain dynamic data on the deployed app
@@ -139,33 +162,51 @@ class HeavenlyCloudServiceWrapper(object):
         deployed_app_additional_data_dict = {'Reservation Id': context.reservation.reservation_id,
                                              'CreatedBy': str(os.path.abspath(__file__))}
 
-        return [DeployAppResult(actionId=action_id, success=True, vmUuid=vm_instance.id, vmName=vm_unique_name,
-                                deployedAppAddress=vm_instance.private_ip,
-                                deployedAppAttributes=deployed_app_attributes,
-                                deployedAppAdditionalData=deployed_app_additional_data_dict,
-                                vmDetailsData=vm_details_data)]
+        deploy_result = DeployAppResult(actionId=action_id, success=True, vmUuid=vm_instance.id,
+                                        vmName=vm_unique_name,
+                                        deployedAppAddress=vm_instance.private_ip,
+                                        deployedAppAttributes=deployed_app_attributes,
+                                        deployedAppAdditionalData=deployed_app_additional_data_dict,
+                                        vmDetailsData=vm_details_data)
+
+        connect_subnet_results = []
+        for connect_subnet_action in connect_subnet_actions:
+            connect_subnet_results.append(
+                ConnectToSubnetActionResult(connect_subnet_action.actionId,
+                                            interface=network_data[connect_subnet_action.actionParams.subnetId]))
+
+        check_cancellation_context_and_do_rollback(cancellation_context)
+
+        return [deploy_result].extend(connect_subnet_results)
 
     @staticmethod
     def extract_vm_details(vm_instance):
+        """
+        :param HeavenResidentInstance vm_instance:
+        """
         vm_instance_data = HeavenlyCloudServiceWrapper.extract_vm_instance_data(vm_instance)
         vm_network_data = HeavenlyCloudServiceWrapper.extract_vm_instance_network_data(vm_instance)
 
         return VmDetailsData(vmInstanceData=vm_instance_data, vmNetworkData=vm_network_data)
 
     @staticmethod
-    def extract_vm_instance_data(instance):
-
+    def extract_vm_instance_data(vm_instance):
+        """
+        :param HeavenResidentInstance vm_instance:
+        """
         data = [
             VmDetailsProperty(key='Cloud Size', value='not so big'),
-            VmDetailsProperty(key='Instance Name', value='dummy' if not instance else instance.name),
+            VmDetailsProperty(key='Instance Name', value='dummy' if not vm_instance else vm_instance.name),
             VmDetailsProperty(key='Hidden stuff', value='something not for UI', hidden=True),
         ]
 
         return data
 
     @staticmethod
-    def extract_vm_instance_network_data(instance):
-
+    def extract_vm_instance_network_data(vm_instance):
+        """
+        :param HeavenResidentInstance vm_instance:
+        """
         network_interfaces = []
 
         # get networking data from the cloudprovider and for each network interface extract the data we want to
@@ -183,7 +224,6 @@ class HeavenlyCloudServiceWrapper(object):
                                                           isPredefined=False,
                                                           # specifies whether network existed before reservation
                                                           networkData=network_data,
-
                                                           privateIpAddress='10.0.0.' + str(i),
                                                           publicIpAddress='8.8.8.' + str(i))
             network_interfaces.append(current_interface)
@@ -191,8 +231,16 @@ class HeavenlyCloudServiceWrapper(object):
         return network_interfaces
 
     @staticmethod
-    def get_vm_details(cloud_provider_resource, cancellation_context, requests_json):
+    def get_vm_details(logger, cloud_provider_resource, cancellation_context, requests_json):
 
+        """
+        :param logging.Logger logger:
+        :param L2HeavenlyCloudShell cloud_provider_resource:
+        :param CancellationContext cancellation_context:
+        :param str requests_json:
+        :param str vm_id:
+        """
+        check_cancellation_context(cancellation_context)
         requests = json.loads(requests_json)
 
         results = []
@@ -205,30 +253,57 @@ class HeavenlyCloudServiceWrapper(object):
             vm_name = request[u'deployedAppJson'][u'name']
             vm_uid = request[u'deployedAppJson'][u'vmdetails'][u'uid']
             address = request[u'deployedAppJson'][u'address']
-            vm_instance = HeavenlyCloudService.get_instance(cloud_provider_resource, vm_name, vm_uid, address)
 
+            vm_instance = HeavenlyCloudService.get_instance(cloud_provider_resource, vm_name, vm_uid, address)
             vm_instance_data = HeavenlyCloudServiceWrapper.extract_vm_instance_data(vm_instance)
             vm_network_data = HeavenlyCloudServiceWrapper.extract_vm_instance_network_data(vm_instance)
+
+            # example of reading custom data created via deployed_app_additional_data_dict at delpoy stage
+            # created_by = next((deployed_app_additional_data['value'] for deployed_app_additional_data in request[u'deployedAppJson'][u'vmdetails'][u'vmCustomParams'] if
+            #                    deployed_app_additional_data['name'] == 'CreatedBy'), None)
+            # if created_by:
+            #     vm_instance_data.append(VmDetailsProperty(key='CreatedBy',value=created_by))
 
             # TODO when prepare connectivity is finished uncomment
             # currently we get error: Check failed because resource is connected to more than one subnet, while reservation doesn't have any subnet services
             # result = VmDetailsData(vmInstanceData=vm_instance_data, vmNetworkData=vm_network_data, appName=vm_name)
-            result = VmDetailsData(vmInstanceData=vm_instance_data, vmNetworkData=None, appName=vm_name)
+            result = VmDetailsData(vmInstanceData=vm_instance_data, vmNetworkData=vm_network_data, appName=vm_name)
             results.append(result)
+
+            check_cancellation_context(cancellation_context)
 
         return results
 
     @staticmethod
     def power_on(cloud_provider_resource, vm_id):
+        """
+         :param L2HeavenlyCloudShell cloud_provider_resource:
+         :param str vm_id:
+         """
         HeavenlyCloudService.power_on(cloud_provider_resource, vm_id)
 
     @staticmethod
     def power_off(cloud_provider_resource, vm_id):
+        """
+        :param L2HeavenlyCloudShell cloud_provider_resource:
+        :param str vm_id:
+        """
         HeavenlyCloudService.power_off(cloud_provider_resource, vm_id)
 
     @staticmethod
     def remote_refresh_ip(cloud_provider_resource, cancellation_context, cloudshell_session, resource_full_name, vm_id,
                           deployed_app_private_ip, deployed_app_public_ip):
+        """
+        :param L2HeavenlyCloudShell cloud_provider_resource:
+        :param CancellationContext cancellation_context:
+        :param CloudShellAPISession cloudshell_session:
+        :param str resource_full_name:
+        :param str vm_id:
+        :param str deployed_app_private_ip:
+        :param str deployed_app_public_ip:
+        """
+
+        check_cancellation_context()
 
         curr_ip = HeavenlyCloudService.remote_refresh_ip(cloud_provider_resource, cancellation_context,
                                                          resource_full_name, vm_id)
@@ -240,10 +315,99 @@ class HeavenlyCloudServiceWrapper(object):
             cloudshell_session.SetAttributeValue(resource_full_name, "Public IP",
                                                  '1.1.1.{}'.format(str(random.randint(1, 253))))
 
+        check_cancellation_context_and_do_rollback(cancellation_context)
+
     @staticmethod
     def delete_instance(cloud_provider_resource, vm_id):
         HeavenlyCloudService.delete_instance(cloud_provider_resource, vm_id)
 
+    # region L2 methods
+    #
+    # @staticmethod
+    # def connect(logger, cloud_provider_resource, set_vlan_action):
+    #     """
+    #     :param logging.Logger logger:
+    #     :param L2HeavenlyCloudShell cloud_provider_resource:
+    #     :param SetVlan set_vlan_action:
+    #     :return:
+    #     :rtype: SetVlanResult
+    #     """
+    #     try:
+    #         vnic_name = '' if not 'Vnic Name'  in set_vlan_action.customActionAttributes else set_vlan_action.customActionAttributes['Vnic Name']
+    #
+    #         logger.info('requested vnic name: ' + vnic_name)
+    #         interface_id = HeavenlyCloudService.connect_vlan(cloud_provider_resource, set_vlan_action)
+    #
+    #         return SetVlanResult(actionId=set_vlan_action.actionId, success=True,infoMessage=vnic_name + ' requested', updatedInterface=interface_id)
+    #     except Exception as e:
+    #         return SetVlanResult(actionId=set_vlan_action.actionId, success=False, errorMessage=traceback.format_exc())
+    #
+    # @staticmethod
+    # def connect_all(logger, cloud_provider_resource, set_vlan_actions):
+    #     """
+    #     :param logging.Logger logger:
+    #     :param L2HeavenlyCloudShell cloud_provider_resource:
+    #     :param [SetVlan] set_vlan_actions:
+    #     :return:
+    #     :rtype: [SetVlanResult]
+    #     """
+    #
+    #     # vlan_type = cloud_provider_resource.vlan_type
+    #     # vlan_type "VLAN" : cloudshell will allow VLAN ids in the 2-4096 range
+    #     # vlan_type "XVLAN"  cloudshell will allow VLAN ids to be allocated in range 2-16,000,000
+    #     # the default value is VLAN
+    #     if not set_vlan_actions:
+    #         return []
+    #
+    #     actions_results = []
+    #     for set_vlan_action in set_vlan_actions:
+    #         actions_results.append(HeavenlyCloudServiceWrapper.connect(logger, cloud_provider_resource, set_vlan_action))
+    #
+    #     return actions_results
+    #
+    # @staticmethod
+    # def disconnect(cloud_provider_resource, remove_vlan_action):
+    #     """
+    #     :param L2HeavenlyCloudShell cloud_provider_resource:
+    #     :param RemoveVlan remove_vlan_action:
+    #     :return:
+    #     :rtype: RemoveVlanResult
+    #     """
+    #
+    #     try:
+    #
+    #         disconnect_interface_id = remove_vlan_action.connectorAttributes['Interface']
+    #         vm_instance_id = remove_vlan_action.customActionAttributes['VM_UUID']
+    #         HeavenlyCloudService.disconnect_vlan(cloud_provider_resource,disconnect_interface_id, vm_instance_id)
+    #
+    #         return RemoveVlanResult(actionId=remove_vlan_action.actionId, success=True, updatedInterface=disconnect_interface_id)
+    #     except Exception as e:
+    #         return RemoveVlanResult(actionId=remove_vlan_action.actionId, success=False,errorMessage=traceback.format_exc())
+    #
+    #
+    # @staticmethod
+    # def disconnect_all(logger, cloud_provider_resource, remove_vlan_actions):
+    #     """
+    #     :param logging.Logger logger:
+    #     :param L2HeavenlyCloudShell cloud_provider_resource:
+    #     :param [RemoveVlan] remove_vlan_actions:
+    #     :return:
+    #     :rtype: [RemoveVlanResult]
+    #     """
+    #
+    #     if not remove_vlan_actions:
+    #         return []
+    #
+    #     actions_results = []
+    #
+    #     for remove_vlan_action in remove_vlan_actions:
+    #         actions_results.append(HeavenlyCloudServiceWrapper.disconnect(cloud_provider_resource, remove_vlan_action))
+    #
+    #     return actions_results
+    #
+    # # endregion L2 methods
+
+    # region L3 methods
     @staticmethod
     def prepare_sandbox_infra(logger, cloud_provider_resource, prepare_infa_action, create_keys_action,
                               prepare_subnet_actions, cancellation_context):
@@ -319,4 +483,6 @@ class HeavenlyCloudServiceWrapper(object):
         """
         # this is the place were we remove all sandbox infra resources from the cloud provider like network, storage,
         # ssh keys, etc
-        return ActionResultBase(actionId=action.actionId, type='CleanupNetwork')
+        return CleanupNetworkResult(actionId=action.actionId)
+
+    # endregion L3 methods
