@@ -152,11 +152,6 @@ class HeavenlyCloudServiceWrapper(object):
         action_id = deploy_app_action.actionId
 
         # optional
-        # deployedAppAttributes contains the attributes on the deployed app
-        # use to override attributes default values
-        deployed_app_attributes = [Attribute('Password', new_pass)]
-
-        # optional
         # deployedAppAdditionalData can contain dynamic data on the deployed app
         # similar to AWS tags
         deployed_app_additional_data_dict = {'Reservation Id': context.reservation.reservation_id,
@@ -303,7 +298,7 @@ class HeavenlyCloudServiceWrapper(object):
         :param str deployed_app_public_ip:
         """
 
-        check_cancellation_context()
+        check_cancellation_context(cancellation_context)
 
         curr_ip = HeavenlyCloudService.remote_refresh_ip(cloud_provider_resource, cancellation_context,
                                                          resource_full_name, vm_id)
