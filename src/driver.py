@@ -46,28 +46,28 @@ class HeavenlyCloudShellDriver(ResourceDriverInterface):
         # return AutoLoadDetails([], [])
 
         # read from context
-        resource = HeavenlyCloudShell.create_from_context(context)
+        cloud_provider_resource = HeavenlyCloudShell.create_from_context(context)
 
         with LoggingSessionContext(context) as logger, ErrorHandlingContext(logger):
             self._log(logger, 'get_inventory_context_json', context)
 
             # validating
-            if resource.name == 'evil':
+            if cloud_provider_resource.name == 'evil':
                 raise ValueError('evil cannot use heaven ')
 
-            if resource.region == 'sun':
+            if cloud_provider_resource.region == 'sun':
                 raise ValueError('invalid region, sorry ca\'nt deploy instances on the sun')
 
             # using your cloud provider sdk
-            if not HeavenlyCloudService.can_connect(resource.user, resource.password,
+            if not HeavenlyCloudService.can_connect(cloud_provider_resource.user, cloud_provider_resource.password,
                                                     context.resource.address):  # TODO add address to resource (gal shellfoundry team)
                 raise ValueError('could not connect using given credentials')
 
             # discovering - using your prefered custom cloud service you can discover and then update values
-            if not resource.heaven_cloud_color:
-                resource.heaven_cloud_color = HeavenlyCloudService.get_prefered_cloud_color()
+            if not cloud_provider_resource.heaven_cloud_color:
+                cloud_provider_resource.heaven_cloud_color = HeavenlyCloudService.get_prefered_cloud_color()
 
-            return resource.create_autoload_details()
+            return cloud_provider_resource.create_autoload_details()
 
     # </editor-fold>
 
