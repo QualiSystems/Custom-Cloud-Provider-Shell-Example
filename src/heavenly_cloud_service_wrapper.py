@@ -90,17 +90,17 @@ class HeavenlyCloudServiceWrapper(object):
                                         deployedAppAddress=vm_instance.private_ip,
                                         deployedAppAttributes=deployed_app_attributes,
                                         deployedAppAdditionalData=deployed_app_additional_data_dict,
+
                                         vmDetailsData=vm_details_data)
 
         connect_subnet_results = []
         for connect_subnet_action in connect_subnet_actions:
-            connect_subnet_results.append(
-                ConnectToSubnetActionResult(connect_subnet_action.actionId,
+            connect_subnet_results.append(ConnectToSubnetActionResult(connect_subnet_action.actionId,
                                             interface=network_data[connect_subnet_action.actionParams.subnetId]))
 
         check_cancellation_context_and_do_rollback(cancellation_context)
 
-        return [deploy_result].extend(connect_subnet_results)
+        return [deploy_result] + connect_subnet_results
 
     @staticmethod
     def deploy_man(context, cloudshell_session, cloud_provider_resource, deploy_app_action, connect_subnet_actions,
@@ -170,7 +170,7 @@ class HeavenlyCloudServiceWrapper(object):
 
         check_cancellation_context_and_do_rollback(cancellation_context)
 
-        return [deploy_result].extend(connect_subnet_results)
+        return [deploy_result] + connect_subnet_results
 
     @staticmethod
     def extract_vm_details(vm_instance):
@@ -224,10 +224,9 @@ class HeavenlyCloudServiceWrapper(object):
         return network_interfaces
 
     @staticmethod
-    def get_vm_details(logger, cloud_provider_resource, cancellation_context, requests_json):
+    def get_vm_details(cloud_provider_resource, cancellation_context, requests_json):
 
         """
-        :param logging.Logger logger:
         :param L2HeavenlyCloudShell cloud_provider_resource:
         :param CancellationContext cancellation_context:
         :param str requests_json:
@@ -406,7 +405,7 @@ class HeavenlyCloudServiceWrapper(object):
                               prepare_subnet_actions, cancellation_context):
         """
         :param logging.Logger logger:
-        :param HeavenlyCloudShell cloud_provider_resource:
+        :param L3HeavenlyCloudShell cloud_provider_resource:
         :param PrepareCloudInfra prepare_infa_action:
         :param CreateKeys create_keys_action:
         :param List[PrepareSubnet] prepare_subnet_actions:
@@ -470,7 +469,7 @@ class HeavenlyCloudServiceWrapper(object):
     @staticmethod
     def cleanup_sandbox_infra(cloud_provider_resource, action):
         """
-        :param HeavenlyCloudShell cloud_provider_resource:
+        :param L3HeavenlyCloudShell cloud_provider_resource:
         :param CleanupNetwork action:
         :return:
         """

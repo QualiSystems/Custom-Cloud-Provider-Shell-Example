@@ -46,7 +46,7 @@ class L3HeavenlyCloudShellDriver(ResourceDriverInterface):
         # return AutoLoadDetails([], [])
 
         # read from context
-        cloud_provider_resource = HeavenlyCloudShell.create_from_context(context)
+        cloud_provider_resource = L3HeavenlyCloudShell.create_from_context(context)
 
         with LoggingSessionContext(context) as logger, ErrorHandlingContext(logger):
             self._log(logger, 'get_inventory_context_json', context)
@@ -102,8 +102,9 @@ class L3HeavenlyCloudShellDriver(ResourceDriverInterface):
                 deployment_name = deploy_action.actionParams.deployment.deploymentPath
 
                 if deployment_name == 'L3HeavenlyCloudShell.HeavenlyCloudAngelDeployment':
+                    logger.info('calling deploy_angel')
                     deploy_results = HeavenlyCloudServiceWrapper.deploy_angel(context, cloudshell_session,
-                                                                             cloud_provider_resource,
+                                                                              cloud_provider_resource,
                                                                              deploy_action,
                                                                              connect_subnet_actions,
                                                                              cancellation_context)
