@@ -297,15 +297,16 @@ class HeavenlyCloudServiceWrapper(object):
 
         check_cancellation_context(cancellation_context)
 
-        curr_ip = HeavenlyCloudService.remote_refresh_ip(cloud_provider_resource, cancellation_context,
-                                                         resource_full_name, vm_id)
+        curr_ip = HeavenlyCloudService.allocate_private_ip(cloud_provider_resource, cancellation_context,
+                                                           resource_full_name, vm_id)
 
         if deployed_app_private_ip != curr_ip:
             cloudshell_session.UpdateResourceAddress(resource_full_name, curr_ip)
 
         if not deployed_app_public_ip:
-            cloudshell_session.SetAttributeValue(resource_full_name, "Public IP",
-                                                 '1.1.1.{}'.format(str(random.randint(1, 253))))
+            new_public_ip = HeavenlyCloudService.allocate_public_ip(cloud_provider_resource, cancellation_context,
+                                                           resource_full_name, vm_id)
+            cloudshell_session.SetAttributeValue(resource_full_name, "Public IP",new_public_ip)
 
         check_cancellation_context_and_do_rollback(cancellation_context)
 

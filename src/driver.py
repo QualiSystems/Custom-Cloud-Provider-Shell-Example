@@ -56,7 +56,7 @@ class L3HeavenlyCloudShellDriver(ResourceDriverInterface):
                 raise ValueError('evil cannot use heaven ')
 
             if cloud_provider_resource.region == 'sun':
-                raise ValueError('invalid region, sorry ca\'nt deploy instances on the sun')
+                raise ValueError('invalid region, sorry cannot deploy instances on the sun')
 
             # using your cloud provider sdk
             if not HeavenlyCloudService.can_connect(cloud_provider_resource.user, cloud_provider_resource.password,
