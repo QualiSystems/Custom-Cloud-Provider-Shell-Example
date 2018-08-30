@@ -42,7 +42,7 @@ class L3HeavenlyCloudShellDriver(ResourceDriverInterface):
 
     def get_inventory(self, context):
 
-        # uncomment - if there is nothing to validate
+    ## uncomment - if there is nothing to validate
         # return AutoLoadDetails([], [])
 
         # read from context
@@ -73,7 +73,7 @@ class L3HeavenlyCloudShellDriver(ResourceDriverInterface):
 
     # <editor-fold desc="Mandatory Commands">
 
-    def Deploy(self, context, request=None, cancellation_context=None):
+    def Deploy(self, context, request, cancellation_context=None):
         """
        Deploy
        :param ResourceCommandContext context:
