@@ -71,29 +71,20 @@ class HeavenlyCloudService(object):
         return HeavenResidentInstance(name, 'wing count {0} flight speed {1}'.format(wing_count, flight_speed), image,
                                       Cloud(cloud_size), str(uuid.uuid4()),
                                       '192.168.0.{}'.format(str(random.randint(1, 253))), None)
-
     @staticmethod
     def get_instance(cloud_provider_resource, name, id, address):
         return HeavenResidentInstance(name, 'instance {0} {1}'.format(name, id), 'centos', Cloud(0), str(id), address,
                                       None)
 
     @staticmethod
+    def get_instance_full(cloud_provider_resource, name ,id):
+        return HeavenResidentInstance(name= name,descrpition= 'instance {0} {1}'.format(name ,id),image='centos',
+                                      cloud= Cloud(0),id=str(id),
+                                      private_ip='192.168.5.{}'.format(str(random.randint(1, 253))),
+                                      public_ip='1.1.1.{}'.format(str(random.randint(1, 253))))
+    @staticmethod
     def set_auth(cloud_provider_resource, user, password):
         pass
-
-    @staticmethod
-    def allocate_private_ip(cloud_provider_resource, cancellation_context, resource_full_name, vm_id):
-        HeavenlyCloudService.connect(cloud_provider_resource.user, cloud_provider_resource.password,
-                                      cloud_provider_resource.address)
-
-        return '192.168.5.{}'.format(str(random.randint(1, 253)))
-
-    @staticmethod
-    def allocate_public_ip(cloud_provider_resource, cancellation_context, resource_full_name, vm_id):
-        HeavenlyCloudService.connect(cloud_provider_resource.user, cloud_provider_resource.password,
-                                     cloud_provider_resource.address)
-
-        return '4.4.4.{}'.format(str(random.randint(1, 253)))
 
     @staticmethod
     def prepare_infra(cloud_provider_resource, cidr):
