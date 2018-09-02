@@ -256,9 +256,6 @@ class HeavenlyCloudServiceWrapper(object):
             # if created_by:
             #     vm_instance_data.append(VmDetailsProperty(key='CreatedBy',value=created_by))
 
-            # TODO when prepare connectivity is finished uncomment
-            # currently we get error: Check failed because resource is connected to more than one subnet, while reservation doesn't have any subnet services
-            # result = VmDetailsData(vmInstanceData=vm_instance_data, vmNetworkData=vm_network_data, appName=vm_name)
             result = VmDetailsData(vmInstanceData=vm_instance_data, vmNetworkData=vm_network_data, appName=vm_name)
             results.append(result)
 
